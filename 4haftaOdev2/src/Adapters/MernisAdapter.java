@@ -3,9 +3,11 @@ import java.rmi.RemoteException;
 import Entities.User;
 import tr.gov.nvi.tckimlik.WS.KPSPublicSoapProxy;
 
-public class MernisAdapter   {
+public class MernisAdapter  implements IAdapters {
+			
 
-	public boolean CheckPersonIdentity(User user) {
+	@Override
+	public boolean adapter(User user) {
 		KPSPublicSoapProxy kpsPublicSoapProxy = new KPSPublicSoapProxy();
 		boolean result = true;
 		try {
@@ -28,7 +30,6 @@ public class MernisAdapter   {
 			return result=false;
 			
 		}
-			
 	}
 
 

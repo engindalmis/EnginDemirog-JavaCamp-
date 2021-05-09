@@ -1,0 +1,124 @@
+BEGIN;
+
+
+CREATE TABLE public.admin_verification
+(
+    id integer NOT NULL,
+    company_id integer NOT NULL,
+    update_user integer NOT NULL,
+    is_ok boolean NOT NULL,
+    verification_date date NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE public.candidates
+(
+    user_id integer NOT NULL,
+    first_name character varying NOT NULL,
+    last_name character varying NOT NULL,
+    identity_number character varying NOT NULL,
+    birth_date date NOT NULL,
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE public.companies
+(
+    user_id integer NOT NULL,
+    name character varying NOT NULL,
+    web_address character varying NOT NULL,
+    phone_number character varying NOT NULL,
+    is_active boolean NOT NULL,
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE public.email_verification
+(
+    user_id integer NOT NULL,
+    is_ok boolean,
+    verification_date date NOT NULL,
+    verification_code character varying NOT NULL,
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE public.employees
+(
+    user_id integer NOT NULL,
+    first_name character varying NOT NULL,
+    last_name character varying NOT NULL,
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE public.job_titles
+(
+    id integer NOT NULL,
+    title character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE public.mernis_verification
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
+    user_id integer NOT NULL,
+    is_ok boolean,
+    verification_date date NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE public.role
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
+    user_id integer NOT NULL,
+    name character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE public.users
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
+    email character varying(50) NOT NULL,
+    password character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.admin_verification
+    ADD FOREIGN KEY (company_id)
+    REFERENCES public.companies (user_id)
+    NOT VALID;
+
+
+ALTER TABLE public.email_verification
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.users (id)
+    NOT VALID;
+
+
+ALTER TABLE public.mernis_verification
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.employees (user_id)
+    NOT VALID;
+
+
+ALTER TABLE public.role
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.users (id)
+    NOT VALID;
+
+
+ALTER TABLE public.users
+    ADD FOREIGN KEY (id)
+    REFERENCES public.candidates (user_id)
+    NOT VALID;
+
+
+ALTER TABLE public.users
+    ADD FOREIGN KEY (id)
+    REFERENCES public.companies (user_id)
+    NOT VALID;
+
+
+ALTER TABLE public.users
+    ADD FOREIGN KEY (id)
+    REFERENCES public.employees (user_id)
+    NOT VALID;
+
+END;

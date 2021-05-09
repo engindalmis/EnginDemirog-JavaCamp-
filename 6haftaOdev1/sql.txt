@@ -1,124 +1,209 @@
-BEGIN;
+-- Table: public.users
 
+-- DROP TABLE public.users;
+
+CREATE TABLE public.users
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
+    email character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    password character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT pk_users_id PRIMARY KEY (id),
+    CONSTRAINT uk_email UNIQUE (email)
+        INCLUDE(email),
+    CONSTRAINT fk_candidates_id FOREIGN KEY (id)
+        REFERENCES public.candidates (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT fk_companies_id FOREIGN KEY (id)
+        REFERENCES public.companies (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT fk_employees_id FOREIGN KEY (id)
+        REFERENCES public.employees (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.users
+    OWNER to postgres;
+	
+	
+	
+	
+	-- Table: public.role
+
+-- DROP TABLE public.role;
+
+CREATE TABLE public.role
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
+    user_id integer NOT NULL,
+    name character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT pk_role_id PRIMARY KEY (id),
+    CONSTRAINT uk_name UNIQUE (name)
+        INCLUDE(name),
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.role
+    OWNER to postgres;
+	
+	
+	-- Table: public.mernis_verification
+
+-- DROP TABLE public.mernis_verification;
+
+CREATE TABLE public.mernis_verification
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
+    user_id integer NOT NULL,
+    is_ok boolean DEFAULT false,
+    verification_date date NOT NULL,
+    CONSTRAINT pk_mernis_verification_id PRIMARY KEY (id),
+    CONSTRAINT fk_employees_id FOREIGN KEY (user_id)
+        REFERENCES public.employees (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.mernis_verification
+    OWNER to postgres;
+	
+	
+	-- Table: public.job_titles
+
+-- DROP TABLE public.job_titles;
+
+CREATE TABLE public.job_titles
+(
+    id integer NOT NULL,
+    title character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT pk_id PRIMARY KEY (id),
+    CONSTRAINT uniq_title UNIQUE (title)
+        INCLUDE(title)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.job_titles
+    OWNER to postgres;
+	
+	-- Table: public.employees
+
+-- DROP TABLE public.employees;
+
+CREATE TABLE public.employees
+(
+    user_id integer NOT NULL,
+    first_name character varying COLLATE pg_catalog."default" NOT NULL,
+    last_name character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT pk_user_id PRIMARY KEY (user_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.employees
+    OWNER to postgres;
+	
+	
+	-- Table: public.email_verification
+
+-- DROP TABLE public.email_verification;
+
+CREATE TABLE public.email_verification
+(
+    user_id integer NOT NULL,
+    is_ok boolean DEFAULT false,
+    verification_date date NOT NULL,
+    verification_code character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT pk_email_verification_id PRIMARY KEY (user_id),
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.email_verification
+    OWNER to postgres;
+	
+	
+	-- Table: public.companies
+
+-- DROP TABLE public.companies;
+
+CREATE TABLE public.companies
+(
+    user_id integer NOT NULL,
+    name character varying COLLATE pg_catalog."default" NOT NULL,
+    web_address character varying COLLATE pg_catalog."default" NOT NULL,
+    phone_number character varying COLLATE pg_catalog."default" NOT NULL,
+    is_active boolean NOT NULL DEFAULT false,
+    CONSTRAINT pk_companies_id PRIMARY KEY (user_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.companies
+    OWNER to postgres;
+	
+	-- Table: public.candidates
+
+-- DROP TABLE public.candidates;
+
+CREATE TABLE public.candidates
+(
+    user_id integer NOT NULL,
+    first_name character varying COLLATE pg_catalog."default" NOT NULL,
+    last_name character varying COLLATE pg_catalog."default" NOT NULL,
+    identity_number character varying COLLATE pg_catalog."default" NOT NULL,
+    birth_date date NOT NULL,
+    CONSTRAINT pk_candidates_id PRIMARY KEY (user_id),
+    CONSTRAINT uk_identitiy_number UNIQUE (identity_number)
+        INCLUDE(identity_number)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.candidates
+    OWNER to postgres;
+	
+	-- Table: public.admin_verification
+
+-- DROP TABLE public.admin_verification;
 
 CREATE TABLE public.admin_verification
 (
     id integer NOT NULL,
     company_id integer NOT NULL,
     update_user integer NOT NULL,
-    is_ok boolean NOT NULL,
+    is_ok boolean NOT NULL DEFAULT false,
     verification_date date NOT NULL,
-    PRIMARY KEY (id)
-);
+    CONSTRAINT pk_admin_verification_id PRIMARY KEY (id),
+    CONSTRAINT fk_company_id FOREIGN KEY (company_id)
+        REFERENCES public.companies (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
 
-CREATE TABLE public.candidates
-(
-    user_id integer NOT NULL,
-    first_name character varying NOT NULL,
-    last_name character varying NOT NULL,
-    identity_number character varying NOT NULL,
-    birth_date date NOT NULL,
-    PRIMARY KEY (user_id)
-);
-
-CREATE TABLE public.companies
-(
-    user_id integer NOT NULL,
-    name character varying NOT NULL,
-    web_address character varying NOT NULL,
-    phone_number character varying NOT NULL,
-    is_active boolean NOT NULL,
-    PRIMARY KEY (user_id)
-);
-
-CREATE TABLE public.email_verification
-(
-    user_id integer NOT NULL,
-    is_ok boolean,
-    verification_date date NOT NULL,
-    verification_code character varying NOT NULL,
-    PRIMARY KEY (user_id)
-);
-
-CREATE TABLE public.employees
-(
-    user_id integer NOT NULL,
-    first_name character varying NOT NULL,
-    last_name character varying NOT NULL,
-    PRIMARY KEY (user_id)
-);
-
-CREATE TABLE public.job_titles
-(
-    id integer NOT NULL,
-    title character varying NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE public.mernis_verification
-(
-    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
-    user_id integer NOT NULL,
-    is_ok boolean,
-    verification_date date NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE public.role
-(
-    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
-    user_id integer NOT NULL,
-    name character varying NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE public.users
-(
-    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 999999 CACHE 1 ),
-    email character varying(50) NOT NULL,
-    password character varying NOT NULL,
-    PRIMARY KEY (id)
-);
+TABLESPACE pg_default;
 
 ALTER TABLE public.admin_verification
-    ADD FOREIGN KEY (company_id)
-    REFERENCES public.companies (user_id)
-    NOT VALID;
-
-
-ALTER TABLE public.email_verification
-    ADD FOREIGN KEY (user_id)
-    REFERENCES public.users (id)
-    NOT VALID;
-
-
-ALTER TABLE public.mernis_verification
-    ADD FOREIGN KEY (user_id)
-    REFERENCES public.employees (user_id)
-    NOT VALID;
-
-
-ALTER TABLE public.role
-    ADD FOREIGN KEY (user_id)
-    REFERENCES public.users (id)
-    NOT VALID;
-
-
-ALTER TABLE public.users
-    ADD FOREIGN KEY (id)
-    REFERENCES public.candidates (user_id)
-    NOT VALID;
-
-
-ALTER TABLE public.users
-    ADD FOREIGN KEY (id)
-    REFERENCES public.companies (user_id)
-    NOT VALID;
-
-
-ALTER TABLE public.users
-    ADD FOREIGN KEY (id)
-    REFERENCES public.employees (user_id)
-    NOT VALID;
-
-END;
+    OWNER to postgres;
